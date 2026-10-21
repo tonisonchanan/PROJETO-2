@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheek</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="32" height="32"><path d="M6 6h20a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H14l-6 5v-5H6a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z" fill="currentColor"/><path d="M11 14.5l3 3 7-7" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div>
+        <h1>Cheek</h1>
+        <p class="subtitulo">Assistente de atendimento</p>
+      </div>
+    </div>
+    <button id="abrir-ajuda" class="botao-ajuda" type="button">Como usar</button>
+  </header>
+
+  <nav class="abas" role="tablist">
+    <button class="aba ativa" role="tab" aria-selected="true" data-aba="chat">
+      <span class="aba-icone" aria-hidden="true">💬</span>
+      <span><strong>Tirar dúvidas</strong><small>Para o cliente</small></span>
+    </button>
+    <button class="aba" role="tab" aria-selected="false" data-aba="conferencia">
+      <span class="aba-icone" aria-hidden="true">✅</span>
+      <span><strong>Conferir pedido</strong><small>Para o atendente</small></span>
+    </button>
+    <button class="aba" role="tab" aria-selected="false" data-aba="catalogo">
+      <span class="aba-icone" aria-hidden="true">📦</span>
+      <span><strong>Catálogo</strong><small>Todos os produtos</small></span>
+    </button>
+  </nav>
+
+  <main>
+    <section id="chat" class="painel ativo" role="tabpanel">
+      <div class="janela-chat">
+        <div id="mensagens" aria-live="polite"></div>
+        <div class="sugestoes" id="sugestoes-chat">
+          <span class="sugestoes-titulo">Experimente perguntar:</span>
+          <button type="button" class="chip" data-pergunta="Tem detergente?">Tem detergente?</button>
+          <button type="button" class="chip" data-pergunta="Quanto custa a água sanitária 5 L?">Quanto custa a água sanitária 5 L?</button>
+          <button type="button" class="chip" data-pergunta="Qual desinfetante tem cheiro de lavanda?">Desinfetante de lavanda</button>
+          <button type="button" class="chip chip-teste" data-pergunta="Vocês vendem cimento?">Vocês vendem cimento?</button>
+          <button type="button" class="chip chip-teste" data-pergunta="Posso misturar água sanitária com detergente?">Posso misturar produtos?</button>
+        </div>
+        <form id="form-chat" class="campo-envio">
+          <input id="pergunta" autocomplete="off" maxlength="500" placeholder="Escreva sua dúvida sobre um produto" aria-label="Sua pergunta" required>
+          <button type="submit" class="botao-principal" aria-label="Enviar">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 11.5 21 3l-8.5 18-2.2-7.3L3 11.5z" fill="currentColor"/></svg>
+            <span>Enviar</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section id="conferencia" class="painel" role="tabpanel">
+      <div class="cartao introducao">
+        <h2>Conferir o item antes de lançar o pedido</h2>
+        <p>Evita lançar no sistema um produto diferente do que o cliente pediu.</p>
+        <ol class="passos">
+          <li><span>1</span>Digite o que o cliente pediu, do jeito que ele falou.</li>
+          <li><span>2</span>Veja os produtos parecidos do catálogo.</li>
+          <li><span>3</span>Escolha o certo e copie o código.</li>
+        </ol>
+      </div>
+
+      <form id="form-conferencia" class="campo-envio">
+        <input id="item" autocomplete="off" maxlength="200" placeholder="Ex.: desinfetante lavanda 5 L" aria-label="Item pedido pelo cliente" required>
+        <button type="submit" class="botao-principal">Conferir</button>
+      </form>
+      <div class="sugestoes">
+        <span class="sugestoes-titulo">Exemplos:</span>
+        <button type="button" class="chip" data-item="desinfetante lavanda 5 L">desinfetante lavanda 5 L</button>
+        <button type="button" class="chip" data-item="amaciante">amaciante</button>
+        <button type="button" class="chip chip-teste" data-item="agua sanitaria 2 L">água sanitária 2 L</button>
+        <button type="button" class="chip" data-item="AM013">AM013</button>
+      </div>
+
+      <div id="aviso" class="aviso" hidden></div>
+      <div id="candidatos" class="lista-candidatos"></div>
+
+      <div id="confirmado" class="confirmado" hidden>
+        <div class="confirmado-icone" aria-hidden="true">✓</div>
+        <div class="confirmado-texto">
+          <p class="rotulo">Código para lançar no pedido</p>
+          <p class="codigo-grande" id="confirmado-codigo"></p>
+          <p id="confirmado-nome"></p>
+        </div>
+        <div class="confirmado-acoes">
+          <button type="button" id="copiar-codigo" class="botao-principal">Copiar código</button>
+          <button type="button" id="conferir-outro" class="botao-secundario">Conferir outro item</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="catalogo" class="painel" role="tabpanel">
+      <div class="barra-catalogo">
+        <input id="filtro" type="search" autocomplete="off" placeholder="Filtrar por nome, código ou tamanho" aria-label="Filtrar catálogo">
+        <span id="contagem" class="contagem"></span>
+      </div>
+      <div id="grade" class="grade"></div>
+    </section>
+  </main>
+
+  <footer>Catálogo de amostra montado pela equipe. Não é o catálogo real da Induprol.</footer>
+
+  <dialog id="ajuda">
+    <h2>Como usar o Cheek</h2>
+    <div class="ajuda-itens">
+      <div>
+        <span class="aba-icone" aria-hidden="true">💬</span>
+        <h3>Tirar dúvidas</h3>
+        <p>O cliente pergunta sobre um produto e o Cheek responde com nome, tamanho e preço do catálogo.</p>
+      </div>
+      <div>
+        <span class="aba-icone" aria-hidden="true">✅</span>
+        <h3>Conferir pedido</h3>
+        <p>O atendente digita o item pedido e confirma o produto certo antes de lançar no sistema.</p>
+      </div>
+      <div>
+        <span class="aba-icone" aria-hidden="true">📦</span>
+        <h3>Catálogo</h3>
+        <p>Mostra todos os produtos que o Cheek conhece. O que não está aqui, ele não responde.</p>
+      </div>
+    </div>
+    <p class="ajuda-regra"><strong>O Cheek não inventa.</strong> Se a pergunta não for sobre um produto do catálogo, ele avisa que não sabe e indica a equipe de atendimento. Dúvidas sobre misturar produtos, contato com pele ou olhos e ingestão são sempre encaminhadas ao rótulo e à ficha de segurança.</p>
+    <form method="dialog"><button class="botao-principal">Entendi, começar</button></form>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
