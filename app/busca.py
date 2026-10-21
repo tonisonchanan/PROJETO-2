@@ -8,7 +8,8 @@ from dataclasses import dataclass, field
 
 from rapidfuzz import fuzz, process
 
-from app.texto import medidas, normalizar, palavras_chave
+from app.conferencia import contradiz_negacao
+from app.texto import chave_nome, medidas, normalizar, palavras_chave
 
 MAX_ITENS = 5
 CORTE_CORRECAO = 85  # semelhança mínima para corrigir um erro de digitação
@@ -74,6 +75,10 @@ def buscar(conn: sqlite3.Connection, pergunta: str) -> Resultado:
         itens = [dict(r) for r in linhas]
         if itens:
             break
+
+    # "tem cloro?" não deve trazer o "Alvejante sem cloro", e vice-versa.
+    pergunta_chave = chave_nome(pergunta)
+    itens = [i for i in itens if not contradiz_negacao(pergunta_chave, chave_nome(i["nome"]))]
 
     # Se o cliente falou em "5 L", os itens com essa medida vêm primeiro.
     if medidas_pedidas:

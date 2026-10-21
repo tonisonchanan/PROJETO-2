@@ -43,7 +43,11 @@ def conectar(caminho: str | Path | None = None) -> sqlite3.Connection:
 
 
 def importar_csv(conn: sqlite3.Connection, caminho: str | Path) -> int:
-    """Importa ou atualiza itens a partir de um CSV (RF001). Devolve o total importado."""
+    """Substitui o catálogo pelos itens do CSV (RF001). Devolve o total importado.
+
+    Item que não está no arquivo sai do catálogo: sobra de um catálogo antigo poderia
+    aparecer na busca e ser confundido com um produto real.
+    """
     with open(caminho, encoding="utf-8-sig", newline="") as f:
         leitor = csv.DictReader(f)
         faltando = [c for c in COLUNAS if c not in (leitor.fieldnames or [])]
@@ -59,8 +63,11 @@ def importar_csv(conn: sqlite3.Connection, caminho: str | Path) -> int:
                 raise ErroImportacao(f"Código ou nome vazio na linha {n}")
             linhas.append((linha["codigo"].strip(), linha["nome"].strip(),
                            linha["descricao"].strip(), linha["unidade"].strip(), preco))
+        if not linhas:
+            raise ErroImportacao("O arquivo não tem nenhum item.")
 
     with conn:
+        conn.execute("DELETE FROM itens")
         conn.executemany(
             "INSERT INTO itens VALUES (?, ?, ?, ?, ?) ON CONFLICT(codigo) DO UPDATE SET "
             "nome=excluded.nome, descricao=excluded.descricao, "

@@ -62,3 +62,13 @@ def test_pergunta_de_seguranca_nao_e_respondida(conn, pergunta):
     r = responder(conn, pergunta)
     assert r["recusou"] is True
     assert r["resposta"] == AVISO_SEGURANCA
+
+
+@pytest.mark.parametrize("pergunta, certo, errado", [
+    ("tem cloro?", "AM026", "AM010"),
+    ("tem alvejante sem cloro?", "AM010", "AM026"),
+])
+def test_chat_nao_confunde_cloro_com_sem_cloro(conn, pergunta, certo, errado):
+    r = responder(conn, pergunta)
+    assert certo in r["itens"]
+    assert errado not in r["itens"]
