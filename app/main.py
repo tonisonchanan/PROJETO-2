@@ -1,4 +1,5 @@
 """Servidor do Cheek. Rodar com: uvicorn app.main:app --reload"""
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -6,12 +7,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app import chat, conferencia, db
+from app import chat, conferencia, db, llm
 
 PASTA_STATIC = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI(title="Cheek", description="Assistente de atendimento restrito ao catálogo")
 conn = db.conectar()
+# CHEEK_LLM=0 desliga o modelo local e usa só o modelo de texto.
+gerador = chat.gerador_por_modelo if os.environ.get("CHEEK_LLM") == "0" else llm.gerador_ollama
 
 
 class Pergunta(BaseModel):
@@ -24,7 +27,7 @@ class ItemDigitado(BaseModel):
 
 @app.post("/chat")
 def rota_chat(entrada: Pergunta) -> dict:
-    resultado = chat.responder(conn, entrada.pergunta)
+    resultado = chat.responder(conn, entrada.pergunta, gerador)
     db.registrar(conn, "chat", entrada.pergunta, resultado["resposta"], resultado["itens"])
     return resultado
 

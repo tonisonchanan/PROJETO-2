@@ -25,7 +25,7 @@ AVISO_SEGURANCA = ("Por segurança, não oriento sobre mistura de produtos, cont
 Gerador = Callable[[str, list[dict]], str]
 
 
-def _preco(valor: float) -> str:
+def formatar_preco(valor: float) -> str:
     return f"R$ {valor:.2f}".replace(".", ",")
 
 
@@ -34,7 +34,7 @@ def gerador_por_modelo(pergunta: str, itens: list[dict]) -> str:
     linhas = ["Encontrei no catálogo:"]
     for i in itens:
         linhas.append(f"- {i['nome']} (código {i['codigo']}): {i['descricao']}. "
-                      f"Unidade: {i['unidade']}. Preço: {_preco(i['preco'])}.")
+                      f"Unidade: {i['unidade']}. Preço: {formatar_preco(i['preco'])}.")
     return "\n".join(linhas)
 
 

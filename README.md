@@ -25,7 +25,26 @@ python -m app.importar dados/catalogo_amostra.csv
 uvicorn app.main:app --reload
 ```
 
-Abra http://localhost:8000. A documentação automática das rotas fica em http://localhost:8000/docs.
+Abra http://localhost:8000.
+
+### Modelo de linguagem local (opcional)
+
+O chat usa um modelo de código aberto rodando no próprio computador pelo [Ollama](https://ollama.com),
+sem API paga e sem chave. O modelo só redige a resposta a partir dos itens que a busca recuperou.
+
+```bash
+ollama pull qwen2.5:0.5b           # uma vez, cerca de 400 MB
+ollama serve                        # se ainda não estiver rodando
+```
+
+Variáveis opcionais: `CHEEK_OLLAMA_MODELO` (padrão `qwen2.5:0.5b`, escolhido por ser pequeno), `CHEEK_OLLAMA_URL`
+(padrão `http://localhost:11434`), `CHEEK_OLLAMA_TEMPO` (segundos, padrão 10, a meta de desempenho) e `CHEEK_LLM=0`
+para desligar o modelo.
+
+Se o Ollama não estiver rodando, demorar demais, ou se a resposta citar código ou preço
+que não estão nos itens recuperados, o Cheek descarta o texto do modelo e responde com o
+modelo de texto montado direto do catálogo. Perguntas fora do catálogo e perguntas de
+segurança nunca chegam ao modelo. A documentação automática das rotas fica em http://localhost:8000/docs.
 
 ## Testes
 
@@ -44,6 +63,7 @@ app/
   conferencia.py  conferência de item por busca aproximada (RF004)
   busca.py        recuperação de itens para o chat (RF002)
   chat.py         resposta, recusa (RF003) e bloqueio de perguntas de segurança
+  llm.py          redação da resposta pelo modelo local (Ollama), com conferência de código e preço
 dados/            catálogo de amostra
 static/           página web (HTML, CSS e JavaScript)
 tests/            testes automatizados (pytest)
@@ -51,8 +71,5 @@ tests/            testes automatizados (pytest)
 
 ## O que ainda falta
 
-- Ligar um modelo de linguagem ao chat. A troca é feita em `chat.responder(..., gerador=...)`:
-  o gerador recebe só os itens recuperados, e nunca é chamado quando a busca não acha nada.
-  A chave da API deve ficar numa variável de ambiente, nunca no código.
 - Rota de importação de catálogo com login de administrador (hoje a importação é só pela linha de comando).
 - Tela de consulta do histórico (o histórico já é gravado na tabela `historico`).
