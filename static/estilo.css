@@ -1,0 +1,25 @@
+:root { --cor: #1f6f8b; --fundo: #f4f6f8; --texto: #1d2329; --alerta: #b54708; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: var(--fundo); color: var(--texto); }
+header { background: var(--cor); color: #fff; padding: 12px 16px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+header h1 { margin: 0; font-size: 1.4rem; }
+nav { display: flex; gap: 8px; }
+.aba { background: transparent; color: #fff; border: 1px solid #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.aba.ativa { background: #fff; color: var(--cor); }
+main { max-width: 760px; margin: 16px auto; padding: 0 16px; }
+.painel { display: none; }
+.painel.ativo { display: block; }
+#mensagens { background: #fff; border-radius: 8px; padding: 12px; min-height: 320px; max-height: 60vh; overflow-y: auto; }
+.msg { margin: 8px 0; padding: 8px 12px; border-radius: 8px; white-space: pre-line; max-width: 85%; }
+.msg.cliente { background: #dcecf2; margin-left: auto; }
+.msg.cheek { background: #eef0f2; }
+.msg.recusa { border-left: 4px solid var(--alerta); }
+form { display: flex; gap: 8px; margin: 12px 0; }
+input { flex: 1; padding: 10px; border: 1px solid #c4ccd4; border-radius: 6px; font-size: 1rem; }
+button[type=submit], .escolher { white-space: nowrap; white-space: nowrap; background: var(--cor); color: #fff; border: 0; border-radius: 6px; padding: 10px 16px; cursor: pointer; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e3e7eb; }
+.divergente { color: var(--alerta); font-weight: 600; }
+#aviso { font-weight: 600; }
+#confirmado { font-size: 1.2rem; font-weight: 700; color: var(--cor); }
+footer { text-align: center; font-size: .85rem; color: #5b6670; padding: 16px; }

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheek</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Cheek</h1>
+    <nav>
+      <button class="aba ativa" data-aba="chat">Chat do cliente</button>
+      <button class="aba" data-aba="conferencia">Conferir item</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="chat" class="painel ativo">
+      <div id="mensagens" aria-live="polite"></div>
+      <form id="form-chat">
+        <input id="pergunta" autocomplete="off" placeholder="Pergunte sobre um produto" required>
+        <button type="submit">Enviar</button>
+      </form>
+    </section>
+
+    <section id="conferencia" class="painel">
+      <form id="form-conferencia">
+        <input id="item" autocomplete="off" placeholder="Nome ou código do item, ex.: desinfetante lavanda 5 L" required>
+        <button type="submit">Conferir</button>
+      </form>
+      <p id="aviso"></p>
+      <table id="candidatos" hidden>
+        <thead><tr><th>Código</th><th>Item</th><th>Unidade</th><th>Semelhança</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p id="confirmado"></p>
+    </section>
+  </main>
+
+  <footer>Catálogo de amostra montado pela equipe. Não é o catálogo real da Induprol.</footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
