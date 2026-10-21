@@ -11,13 +11,44 @@ LIMIAR_MINIMO = 70     # abaixo disso o item não é sugerido
 LIMIAR_CONFIANTE = 90  # a partir disso o item é considerado um bom candidato
 MARGEM_AMBIGUIDADE = 5  # candidatos a menos de 5 pontos do primeiro são "empate"
 PENALIDADE_MEDIDA = 25  # volume ou peso diferente do digitado
+PESO_COBERTURA = 0.3     # quanto pesa a consulta ter palavras que o item não tem
+PENALIDADE_NEGACAO = 30  # item "sem cloro" quando o atendente digitou só "cloro"
 MAX_CANDIDATOS = 3
+
+
+def _negadas(texto: str) -> set[str]:
+    palavras = texto.split()
+    return {palavras[n + 1] for n, p in enumerate(palavras[:-1]) if p == "sem"}
+
+
+def contradiz_negacao(consulta: str, nome: str) -> bool:
+    """Um lado diz "sem X" e o outro fala em X sem o "sem": "cloro" contra "alvejante sem cloro"."""
+    for texto, outro in ((nome, consulta), (consulta, nome)):
+        if any(x in outro.split() and x not in _negadas(outro) for x in _negadas(texto)):
+            return True
+    return False
+
+
+def _cobertura(consulta: str, nome: str) -> float:
+    """Fração das palavras digitadas que aparecem no nome, tolerando erro de digitação."""
+    termos, palavras_nome = consulta.split(), nome.split()
+    if not termos:
+        return 1.0
+    cobertas = sum(any(fuzz.ratio(t, p) >= 80 for p in palavras_nome) for t in termos)
+    return cobertas / len(termos)
 
 
 def _pontuar(consulta: str, item: dict) -> tuple[float, bool | None]:
     # O nome é comparado sem a medida; a medida entra depois, como penalidade.
     # Assim "Limpa Pedras 5 L" não fica parecido com "desinfetante 5 L" só por causa do "5 L".
-    nota = fuzz.token_set_ratio(chave_nome(consulta), chave_nome(item["nome"]))
+    chave_consulta, chave_item = chave_nome(consulta), chave_nome(item["nome"])
+    nota = fuzz.token_set_ratio(chave_consulta, chave_item)
+    # token_set_ratio dá 100 para "Detergente 5L" quando se digita "detergente clorado",
+    # porque o nome cabe inteiro na consulta. Palavra digitada que o item não tem tira pontos.
+    nota *= 1 - PESO_COBERTURA * (1 - _cobertura(chave_consulta, chave_item))
+    # token_set_ratio ignora o "sem"; em produto químico essa troca é a mais perigosa.
+    if contradiz_negacao(chave_consulta, chave_item):
+        nota = max(0.0, nota - PENALIDADE_NEGACAO)
     medidas_consulta = medidas(consulta)
     if not medidas_consulta:
         return nota, None

@@ -34,13 +34,31 @@ def test_volume_diferente_nao_fica_em_primeiro(itens):
 
 @pytest.mark.parametrize("texto, possiveis", [
     ("desinfetante lavanda", {"AM004", "AM005"}),  # falta o volume
-    ("cloro", {"AM010", "AM026"}),                  # "sem cloro" e cloro de piscina
     ("detergente 500ml", {"AM001", "AM003"}),
 ])
 def test_sem_informacao_suficiente_pede_confirmacao(itens, texto, possiveis):
     r = conferir(texto, itens)
     assert r["status"] == "ambiguo"
     assert possiveis <= set(codigos(r))
+
+
+@pytest.mark.parametrize("texto, certo, errado", [
+    ("cloro", "AM026", "AM010"),
+    ("alvejante sem cloro", "AM010", "AM026"),
+])
+def test_sem_cloro_nao_empata_com_cloro(itens, texto, certo, errado):
+    # token_set_ratio sozinho ignora o "sem" e dava empate em 100 entre os dois.
+    r = conferir(texto, itens)
+    assert codigos(r)[0] == certo
+    notas = {c["codigo"]: c["semelhanca"] for c in r["candidatos"]}
+    assert notas.get(errado, 0) < notas[certo] - 20
+
+
+def test_palavra_a_mais_na_consulta_desempata(itens):
+    # O item que tem todas as palavras digitadas fica na frente.
+    r = conferir("detergente limao", itens)
+    assert r["status"] == "encontrado"
+    assert codigos(r)[0] == "AM003"
 
 
 def test_volume_inexistente_avisa(itens):
