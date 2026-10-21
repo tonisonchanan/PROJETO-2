@@ -28,13 +28,17 @@ function aviso(texto) {
 
 // Ícone só para facilitar a leitura; não muda nada na busca.
 const EMOJIS = [
-  [/sabonete|sab[aã]o|saponáceo/i, "🧼"],
-  [/piscina/i, "🏊"],
-  [/vidro/i, "🪟"],
-  [/cera|lustra|pedra|piso/i, "🧹"],
+  [/luva/i, "🧤"],
+  [/papel/i, "🧻"],
+  [/balde/i, "🪣"],
+  [/mop|vassour|rodo|pá de lixo|escova/i, "🧹"],
+  [/esponja|fibra|palha|lã de aço|pano|flanela|estopa|toalha|saca/i, "🧽"],
+  [/sabonete|sab[aã]o|saponáceo|pasta/i, "🧼"],
+  [/piscina|algicida|clarificante/i, "🏊"],
+  [/glade|bom ar|aromatizante|odorizador/i, "🌸"],
+  [/amaciante|roupa|alvejante|grampo/i, "👕"],
+  [/dispenser|lixeira|embalagem vazia/i, "📦"],
   [/álcool|alcool|gel/i, "🫧"],
-  [/odorizador/i, "🌸"],
-  [/amaciante|roupa|alvejante/i, "👕"],
 ];
 const emoji = (nome) => (EMOJIS.find(([re]) => re.test(nome)) || [null, "🧴"])[1];
 
@@ -59,8 +63,13 @@ function cartaoProduto(item, comAcoes) {
   topo.append(el("span", "produto-emoji", emoji(item.nome)), el("span", "produto-nome", item.nome));
   const rodape = el("div", "produto-rodape");
   rodape.append(el("span", "preco", preco(item.preco)), el("span", "codigo", item.codigo));
-  c.append(topo, el("span", "produto-desc", item.descricao), el("span", "etiqueta", item.unidade), rodape);
-  c.querySelector(".etiqueta").style.alignSelf = "flex-start";
+  c.append(topo, el("span", "produto-desc", item.descricao));
+  if (item.unidade) {
+    const unidade = el("span", "etiqueta", item.unidade);
+    unidade.style.alignSelf = "flex-start";
+    c.append(unidade);
+  }
+  c.append(rodape);
   if (comAcoes) {
     const acoes = el("div", "produto-acoes");
     const perguntar = el("button", "", "Perguntar no chat");
@@ -220,7 +229,7 @@ function nivel(semelhanca) {
 
 function confirmar(c) {
   document.getElementById("confirmado-codigo").textContent = c.codigo;
-  document.getElementById("confirmado-nome").textContent = `${c.nome} · ${c.unidade} · ${preco(c.preco)}`;
+  document.getElementById("confirmado-nome").textContent = [c.nome, c.unidade, preco(c.preco)].filter(Boolean).join(" · ");
   const caixaOk = document.getElementById("confirmado");
   caixaOk.hidden = false;
   caixaOk.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -253,7 +262,9 @@ async function conferirItem(texto) {
     const info = el("div", "candidato-info");
     info.append(el("div", "produto-nome", c.nome));
     const meta = el("div", "candidato-meta");
-    meta.append(el("span", "codigo", c.codigo), el("span", "etiqueta", c.unidade), el("span", "preco", preco(c.preco)));
+    meta.append(el("span", "codigo", c.codigo));
+    if (c.unidade) meta.append(el("span", "etiqueta", c.unidade));
+    meta.append(el("span", "preco", preco(c.preco)));
     if (c.medida_confere === false) meta.append(el("span", "etiqueta medida-divergente", "⚠️ Tamanho diferente do digitado"));
     const [classe, rotulo] = nivel(c.semelhanca);
     const sem = el("div", "semelhanca");

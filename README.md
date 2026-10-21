@@ -12,8 +12,9 @@ Esta é a primeira versão do MVP. Ela tem duas telas:
   candidatos do catálogo, com o volume conferido. Usa busca aproximada (rapidfuzz), sem modelo de linguagem,
   para que o resultado seja sempre o mesmo para a mesma entrada.
 
-O catálogo em `dados/catalogo_amostra.csv` é uma **amostra fictícia montada pela equipe**,
-não o catálogo da Induprol. Veja `dados/LEIAME.md`.
+O catálogo em `dados/catalogo_induprol.csv` tem 96 produtos da loja virtual da Induprol
+(induprol.lojaintegrada.com.br), com nome, código (SKU da loja), descrição e preço lidos em 21/10/2026.
+Ficaram de fora os produtos sem preço confirmado. Veja `dados/LEIAME.md`.
 
 ## Como rodar
 
@@ -21,7 +22,7 @@ não o catálogo da Induprol. Veja `dados/LEIAME.md`.
 python -m venv .venv
 source .venv/bin/activate          # no Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m app.importar dados/catalogo_amostra.csv
+python -m app.importar dados/catalogo_induprol.csv
 uvicorn app.main:app --reload
 ```
 
@@ -44,7 +45,7 @@ app/
   conferencia.py  conferência de item por busca aproximada (RF004)
   busca.py        recuperação de itens para o chat (RF002)
   chat.py         resposta, recusa (RF003) e bloqueio de perguntas de segurança
-dados/            catálogo de amostra
+dados/            catálogo da Induprol e amostra fictícia usada nos testes
 static/           página web (HTML, CSS e JavaScript)
 tests/            testes automatizados (pytest)
 ```

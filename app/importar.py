@@ -1,4 +1,4 @@
-"""Uso: python -m app.importar dados/catalogo_amostra.csv"""
+"""Uso: python -m app.importar dados/catalogo_induprol.csv"""
 import sys
 
 from app.db import ErroImportacao, conectar, importar_csv
