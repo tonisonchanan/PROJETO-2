@@ -14,8 +14,8 @@ import urllib.request
 from app.chat import formatar_preco, gerador_por_modelo
 
 URL = os.environ.get("CHEEK_OLLAMA_URL", "http://localhost:11434")
-MODELO = os.environ.get("CHEEK_OLLAMA_MODELO", "llama3.2:3b")
-TEMPO_LIMITE = float(os.environ.get("CHEEK_OLLAMA_TEMPO", "30"))
+MODELO = os.environ.get("CHEEK_OLLAMA_MODELO", "qwen2.5:0.5b")
+TEMPO_LIMITE = float(os.environ.get("CHEEK_OLLAMA_TEMPO", "10"))
 
 INSTRUCAO = (
     "Você é o Cheek, atendente virtual de uma fabricante de produtos de limpeza. "

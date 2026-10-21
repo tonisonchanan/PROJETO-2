@@ -33,12 +33,12 @@ O chat usa um modelo de código aberto rodando no próprio computador pelo [Olla
 sem API paga e sem chave. O modelo só redige a resposta a partir dos itens que a busca recuperou.
 
 ```bash
-ollama pull llama3.2:3b            # uma vez
+ollama pull qwen2.5:0.5b           # uma vez, cerca de 400 MB
 ollama serve                        # se ainda não estiver rodando
 ```
 
-Variáveis opcionais: `CHEEK_OLLAMA_MODELO` (padrão `llama3.2:3b`), `CHEEK_OLLAMA_URL`
-(padrão `http://localhost:11434`), `CHEEK_OLLAMA_TEMPO` (segundos, padrão 30) e `CHEEK_LLM=0`
+Variáveis opcionais: `CHEEK_OLLAMA_MODELO` (padrão `qwen2.5:0.5b`, escolhido por ser pequeno), `CHEEK_OLLAMA_URL`
+(padrão `http://localhost:11434`), `CHEEK_OLLAMA_TEMPO` (segundos, padrão 10, a meta de desempenho) e `CHEEK_LLM=0`
 para desligar o modelo.
 
 Se o Ollama não estiver rodando, demorar demais, ou se a resposta citar código ou preço
