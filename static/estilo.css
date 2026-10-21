@@ -16,7 +16,7 @@ main { max-width: 760px; margin: 16px auto; padding: 0 16px; }
 .msg.recusa { border-left: 4px solid var(--alerta); }
 form { display: flex; gap: 8px; margin: 12px 0; }
 input { flex: 1; padding: 10px; border: 1px solid #c4ccd4; border-radius: 6px; font-size: 1rem; }
-button[type=submit], .escolher { white-space: nowrap; white-space: nowrap; background: var(--cor); color: #fff; border: 0; border-radius: 6px; padding: 10px 16px; cursor: pointer; }
+button[type=submit], .escolher { white-space: nowrap; background: var(--cor); color: #fff; border: 0; border-radius: 6px; padding: 10px 16px; cursor: pointer; }
 table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
 th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e3e7eb; }
 .divergente { color: var(--alerta); font-weight: 600; }
