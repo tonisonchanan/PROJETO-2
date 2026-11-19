@@ -33,6 +33,10 @@
       <span class="aba-icone" aria-hidden="true">📦</span>
       <span><strong>Catálogo</strong><small>Todos os produtos</small></span>
     </button>
+    <button class="aba" role="tab" aria-selected="false" data-aba="admin">
+      <span class="aba-icone" aria-hidden="true">🔒</span>
+      <span><strong>Administração</strong><small>Catálogo e histórico</small></span>
+    </button>
   </nav>
 
   <main>
@@ -103,6 +107,54 @@
         <span id="contagem" class="contagem"></span>
       </div>
       <div id="grade" class="grade"></div>
+    </section>
+
+    <section id="admin" class="painel" role="tabpanel">
+      <form id="form-login" class="cartao login">
+        <h2>Entrar como administrador</h2>
+        <p>A importação do catálogo e o histórico de atendimentos ficam protegidos por senha.</p>
+        <label>Usuário <input id="login-usuario" autocomplete="username" maxlength="100" required></label>
+        <label>Senha <input id="login-senha" type="password" autocomplete="current-password" maxlength="200" required></label>
+        <p id="login-erro" class="erro-form" hidden></p>
+        <button type="submit" class="botao-principal">Entrar</button>
+      </form>
+
+      <div id="area-admin" hidden>
+        <div class="barra-admin">
+          <span>Você está na área administrativa.</span>
+          <button type="button" id="sair" class="botao-secundario">Sair</button>
+        </div>
+
+        <div class="cartao">
+          <h2>Importar catálogo</h2>
+          <p>Envie um arquivo CSV com as colunas <code>codigo, nome, descricao, unidade, preco</code>.
+            O arquivo <strong>substitui o catálogo inteiro</strong>. Se houver erro em alguma linha, nada muda.</p>
+          <form id="form-importar" class="linha-importar">
+            <input id="arquivo-csv" type="file" accept=".csv,text/csv" required aria-label="Arquivo CSV do catálogo">
+            <button type="submit" class="botao-principal">Importar</button>
+          </form>
+          <div id="resultado-importacao" class="aviso" hidden></div>
+        </div>
+
+        <div class="cartao">
+          <div class="titulo-historico">
+            <h2>Histórico</h2>
+            <select id="filtro-historico" aria-label="Filtrar histórico">
+              <option value="">Tudo</option>
+              <option value="chat">Só perguntas do chat</option>
+              <option value="conferencia">Só conferências</option>
+            </select>
+            <button type="button" id="atualizar-historico" class="botao-secundario">Atualizar</button>
+          </div>
+          <p class="dica">Mostra o texto digitado, o que o Cheek respondeu e os códigos usados. Não guarda nome nem telefone do cliente.</p>
+          <div class="tabela-rolagem">
+            <table class="tabela-historico">
+              <thead><tr><th>Data e hora</th><th>Tipo</th><th>Entrada</th><th>Resultado</th><th>Códigos</th></tr></thead>
+              <tbody id="linhas-historico"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -1,5 +1,6 @@
 """Banco do catálogo e do histórico (SQLite)."""
 import csv
+import io
 import os
 import sqlite3
 from pathlib import Path
@@ -43,28 +44,35 @@ def conectar(caminho: str | Path | None = None) -> sqlite3.Connection:
 
 
 def importar_csv(conn: sqlite3.Connection, caminho: str | Path) -> int:
+    """Importa o catálogo de um arquivo CSV (linha de comando)."""
+    with open(caminho, encoding="utf-8-sig", newline="") as f:
+        return importar_texto(conn, f.read())
+
+
+def importar_texto(conn: sqlite3.Connection, conteudo: str) -> int:
     """Substitui o catálogo pelos itens do CSV (RF001). Devolve o total importado.
 
     Item que não está no arquivo sai do catálogo: sobra de um catálogo antigo poderia
-    aparecer na busca e ser confundido com um produto real.
+    aparecer na busca e ser confundido com um produto real. Se o arquivo tiver qualquer
+    erro, nada é gravado e o catálogo anterior continua valendo.
     """
-    with open(caminho, encoding="utf-8-sig", newline="") as f:
-        leitor = csv.DictReader(f)
-        faltando = [c for c in COLUNAS if c not in (leitor.fieldnames or [])]
-        if faltando:
-            raise ErroImportacao(f"Colunas faltando no arquivo: {', '.join(faltando)}")
-        linhas = []
-        for n, linha in enumerate(leitor, start=2):
-            try:
-                preco = float(linha["preco"].replace(",", "."))
-            except ValueError:
-                raise ErroImportacao(f"Preço inválido na linha {n}: {linha['preco']!r}")
-            if not linha["codigo"].strip() or not linha["nome"].strip():
-                raise ErroImportacao(f"Código ou nome vazio na linha {n}")
-            linhas.append((linha["codigo"].strip(), linha["nome"].strip(),
-                           linha["descricao"].strip(), linha["unidade"].strip(), preco))
-        if not linhas:
-            raise ErroImportacao("O arquivo não tem nenhum item.")
+    conteudo = conteudo.lstrip("\ufeff")
+    leitor = csv.DictReader(io.StringIO(conteudo, newline=""))
+    faltando = [c for c in COLUNAS if c not in (leitor.fieldnames or [])]
+    if faltando:
+        raise ErroImportacao(f"Colunas faltando no arquivo: {', '.join(faltando)}")
+    linhas = []
+    for n, linha in enumerate(leitor, start=2):
+        campos = {c: (linha.get(c) or "").strip() for c in COLUNAS}
+        try:
+            preco = float(campos["preco"].replace(",", "."))
+        except ValueError:
+            raise ErroImportacao(f"Preço inválido na linha {n}: {campos['preco']!r}")
+        if not campos["codigo"] or not campos["nome"]:
+            raise ErroImportacao(f"Código ou nome vazio na linha {n}")
+        linhas.append((campos["codigo"], campos["nome"], campos["descricao"], campos["unidade"], preco))
+    if not linhas:
+        raise ErroImportacao("O arquivo não tem nenhum item.")
 
     with conn:
         conn.execute("DELETE FROM itens")
@@ -93,3 +101,15 @@ def registrar(conn: sqlite3.Connection, tipo: str, entrada: str, saida: str, ite
             )
     except sqlite3.Error:
         pass
+
+
+def listar_historico(conn: sqlite3.Connection, limite: int = 200, tipo: str | None = None) -> list[dict]:
+    """Últimos registros do histórico, do mais novo para o mais antigo (RF005)."""
+    sql = "SELECT id, criado_em, tipo, entrada, saida, itens FROM historico"
+    parametros: list = []
+    if tipo:
+        sql += " WHERE tipo = ?"
+        parametros.append(tipo)
+    sql += " ORDER BY id DESC LIMIT ?"
+    parametros.append(limite)
+    return [dict(r) for r in conn.execute(sql, parametros)]
