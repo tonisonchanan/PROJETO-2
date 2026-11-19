@@ -28,6 +28,17 @@ uvicorn app.main:app --reload
 
 Abra http://localhost:8000. A documentação automática das rotas fica em http://localhost:8000/docs.
 
+### Área administrativa
+
+A aba **Administração** pede usuário e senha (RF006) e libera a importação do catálogo por arquivo CSV
+(RF001) e a lista do histórico de conversas e conferências (RF005). Usuário e senha vêm das variáveis
+de ambiente `CHEEK_ADMIN_USUARIO` (padrão `admin`) e `CHEEK_ADMIN_SENHA`. Se a senha não for definida,
+o servidor sorteia uma ao iniciar e a mostra no terminal.
+
+```bash
+export CHEEK_ADMIN_SENHA='escolha-uma-senha'   # no Windows: set CHEEK_ADMIN_SENHA=escolha-uma-senha
+```
+
 ## Testes
 
 ```bash
@@ -41,6 +52,7 @@ app/
   main.py         rotas FastAPI e página inicial
   db.py           banco SQLite: catálogo, índice de busca (FTS5) e histórico; importação de CSV
   importar.py     importação do catálogo pela linha de comando
+  admin.py        login do administrador e sessão (RF006)
   texto.py        normalização de texto, medidas (5 L, 500 ml) e palavras ignoradas
   conferencia.py  conferência de item por busca aproximada (RF004)
   busca.py        recuperação de itens para o chat (RF002)
@@ -55,5 +67,3 @@ tests/            testes automatizados (pytest)
 - Ligar um modelo de linguagem ao chat. A troca é feita em `chat.responder(..., gerador=...)`:
   o gerador recebe só os itens recuperados, e nunca é chamado quando a busca não acha nada.
   A chave da API deve ficar numa variável de ambiente, nunca no código.
-- Rota de importação de catálogo com login de administrador (hoje a importação é só pela linha de comando).
-- Tela de consulta do histórico (o histórico já é gravado na tabela `historico`).

@@ -333,3 +333,128 @@ function desenharCatalogo() {
 document.getElementById("filtro").addEventListener("input", desenharCatalogo);
 
 carregarCatalogo();
+
+// Administração (RF001, RF005, RF006)
+async function chamarAdmin(rota, opcoes = {}) {
+  const r = await fetch(rota, { credentials: "same-origin", ...opcoes });
+  let corpo = null;
+  try { corpo = await r.json(); } catch { corpo = null; }
+  if (!r.ok) {
+    const erro = new Error((corpo && corpo.detail) || "Erro " + r.status);
+    erro.status = r.status;
+    throw erro;
+  }
+  return corpo;
+}
+
+const formLogin = document.getElementById("form-login");
+const areaAdmin = document.getElementById("area-admin");
+
+function mostrarAdmin(logado) {
+  formLogin.hidden = logado;
+  areaAdmin.hidden = !logado;
+  if (logado) carregarHistorico();
+}
+
+formLogin.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const erro = document.getElementById("login-erro");
+  erro.hidden = true;
+  try {
+    await chamarAdmin("/admin/entrar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usuario: document.getElementById("login-usuario").value,
+        senha: document.getElementById("login-senha").value,
+      }),
+    });
+    document.getElementById("login-senha").value = "";
+    mostrarAdmin(true);
+  } catch (err) {
+    erro.textContent = err.message;
+    erro.hidden = false;
+  }
+});
+
+document.getElementById("sair").addEventListener("click", async () => {
+  try { await chamarAdmin("/admin/sair", { method: "POST" }); } catch { /* a sessão já pode ter acabado */ }
+  mostrarAdmin(false);
+});
+
+function quandoSessaoAcabar(err) {
+  if (err.status === 401) {
+    mostrarAdmin(false);
+    aviso("Sua sessão terminou. Entre de novo.");
+    return true;
+  }
+  return false;
+}
+
+document.getElementById("form-importar").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const arquivo = document.getElementById("arquivo-csv").files[0];
+  const caixaResultado = document.getElementById("resultado-importacao");
+  if (!arquivo) return;
+  const botao = e.submitter || document.querySelector("#form-importar button");
+  botao.disabled = true;
+  try {
+    const conteudo = await arquivo.text();
+    const r = await chamarAdmin("/admin/importar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conteudo }),
+    });
+    caixaResultado.className = "aviso encontrado";
+    caixaResultado.textContent = `✅ ${r.importados} itens importados. O catálogo foi substituído.`;
+    porCodigo.clear();
+    await carregarCatalogo();
+  } catch (err) {
+    if (quandoSessaoAcabar(err)) return;
+    caixaResultado.className = "aviso nao_encontrado";
+    caixaResultado.textContent = "❌ " + err.message;
+  } finally {
+    caixaResultado.hidden = false;
+    botao.disabled = false;
+  }
+});
+
+const NOMES_TIPO = { chat: "Chat", conferencia: "Conferência" };
+
+async function carregarHistorico() {
+  const tipo = document.getElementById("filtro-historico").value;
+  const corpo = document.getElementById("linhas-historico");
+  let registros;
+  try {
+    registros = await chamarAdmin("/admin/historico" + (tipo ? "?tipo=" + tipo : ""));
+  } catch (err) {
+    if (!quandoSessaoAcabar(err)) aviso("Não consegui carregar o histórico.");
+    return;
+  }
+  corpo.replaceChildren(...registros.map((h) => {
+    const tr = el("tr");
+    const tipoCel = el("td");
+    tipoCel.append(el("span", "tipo " + h.tipo, NOMES_TIPO[h.tipo] || h.tipo));
+    tr.append(el("td", "", h.criado_em), tipoCel, el("td", "", h.entrada),
+      el("td", "resultado", h.saida), el("td", "", h.itens.split(",").filter(Boolean).join("\n")));
+    return tr;
+  }));
+  if (!registros.length) {
+    const tr = el("tr");
+    const td = el("td", "vazio", "Nenhum registro ainda.");
+    td.colSpan = 5;
+    tr.append(td);
+    corpo.append(tr);
+  }
+}
+
+document.getElementById("filtro-historico").addEventListener("change", carregarHistorico);
+document.getElementById("atualizar-historico").addEventListener("click", carregarHistorico);
+document.querySelector('[data-aba="admin"]').addEventListener("click", async () => {
+  try {
+    const s = await chamarAdmin("/admin/sessao");
+    mostrarAdmin(s.autenticado);
+  } catch {
+    mostrarAdmin(false);
+  }
+});

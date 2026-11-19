@@ -7,6 +7,8 @@ import pytest
 # O servidor abre o banco ao ser importado, então o banco de teste é definido antes.
 _tmp = tempfile.mkdtemp()
 os.environ["CHEEK_DB"] = str(Path(_tmp) / "teste.db")
+os.environ["CHEEK_ADMIN_USUARIO"] = "admin"
+os.environ["CHEEK_ADMIN_SENHA"] = "senha-de-teste"
 
 from app import db  # noqa: E402
 
