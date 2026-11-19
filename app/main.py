@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app import admin, chat, conferencia, db
+from app import admin, chat, conferencia, db, llm
 
 PASTA_STATIC = Path(__file__).resolve().parent.parent / "static"
 
@@ -15,6 +15,8 @@ conn = db.conectar()
 
 if (_aviso := admin.aviso_de_inicio()):
     print(_aviso, flush=True)
+print(f"Chat: redigido pelo modelo {llm.MODELO}." if llm.ativo()
+      else "Chat: sem ANTHROPIC_API_KEY, respostas montadas direto do catálogo.", flush=True)
 
 
 class Pergunta(BaseModel):
@@ -27,7 +29,8 @@ class ItemDigitado(BaseModel):
 
 @app.post("/chat")
 def rota_chat(entrada: Pergunta) -> dict:
-    resultado = chat.responder(conn, entrada.pergunta)
+    gerador = llm.gerador_llm if llm.ativo() else chat.gerador_por_modelo
+    resultado = chat.responder(conn, entrada.pergunta, gerador=gerador)
     db.registrar(conn, "chat", entrada.pergunta, resultado["resposta"], resultado["itens"])
     return resultado
 

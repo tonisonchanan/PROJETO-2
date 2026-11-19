@@ -57,13 +57,34 @@ app/
   conferencia.py  conferência de item por busca aproximada (RF004)
   busca.py        recuperação de itens para o chat (RF002)
   chat.py         resposta, recusa (RF003) e bloqueio de perguntas de segurança
+  llm.py          redação opcional pelo modelo de linguagem, com conferência da resposta
 dados/            catálogo da Induprol e amostra fictícia usada nos testes
 static/           página web (HTML, CSS e JavaScript)
 tests/            testes automatizados (pytest)
+experimentos/     perguntas de teste e script que as roda
 ```
 
-## O que ainda falta
+## Modelo de linguagem (opcional)
 
-- Ligar um modelo de linguagem ao chat. A troca é feita em `chat.responder(..., gerador=...)`:
-  o gerador recebe só os itens recuperados, e nunca é chamado quando a busca não acha nada.
-  A chave da API deve ficar numa variável de ambiente, nunca no código.
+Com a variável `ANTHROPIC_API_KEY` definida, o chat pede ao modelo `claude-opus-5-5` (troque com
+`CHEEK_LLM_MODELO`) que redija a resposta usando só os itens que a busca recuperou. Sem a chave, o chat
+responde com o texto montado direto do catálogo. A resposta do modelo é descartada, e vale o texto montado,
+quando demora mais que 10 segundos (`CHEEK_LLM_TEMPO`), quando a API falha ou recusa, ou quando o texto cita
+código que não foi recuperado ou preço diferente do catálogo. Se a busca não acha nada, o modelo nem é chamado.
+
+```bash
+export ANTHROPIC_API_KEY='sua-chave'   # no Windows: set ANTHROPIC_API_KEY=sua-chave
+```
+
+A chave nunca vai para o código nem para o repositório.
+
+## Experimentos
+
+`python -m experimentos.rodar` roda as 22 perguntas de `experimentos/perguntas_teste.csv` contra o catálogo
+real e compara com o resultado esperado (`--md` gera a tabela em Markdown).
+
+## Trabalhos futuros
+
+- Atendimento pelo WhatsApp.
+- Integração com o sistema de nota fiscal e boleto da empresa.
+- Banco PostgreSQL e hospedagem, se o Cheek sair do computador local.
